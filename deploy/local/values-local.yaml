@@ -1,6 +1,6 @@
 image:
   repository: localhost:5001/hello-demo
-  tag: "local"
+  tag: "9"
   pullPolicy: IfNotPresent
 
 env:

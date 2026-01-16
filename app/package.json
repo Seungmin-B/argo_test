@@ -1,0 +1,11 @@
+{
+  "name": "hello-demo",
+  "version": "0.1.0",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"require('http').get('http://127.0.0.1:1',()=>{}).on('error',()=>process.exit(0));\""
+  },
+  "dependencies": {}
+}

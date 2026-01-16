@@ -1,0 +1,7 @@
+image:
+  repository: localhost:5001/hello-demo
+  tag: "local"
+  pullPolicy: IfNotPresent
+
+env:
+  APP_VERSION: "local"

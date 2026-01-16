@@ -43,23 +43,25 @@ pipeline {
         expression { return env.SKIP_PUSH != 'true' }
       }
       steps {
-        sh '''
-          set -eu
+        sshagent(['github-ssh']) {
+          sh '''
+            set -eu
 
-          git config user.name "${GIT_USER_NAME}"
-          git config user.email "${GIT_USER_EMAIL}"
+            git config user.name "${GIT_USER_NAME}"
+            git config user.email "${GIT_USER_EMAIL}"
 
-          sed -i "s/^  tag: .*/  tag: \\"${IMAGE_TAG}\\"/" deploy/local/values-local.yaml
+            sed -i "s/^  tag: .*/  tag: \\"${IMAGE_TAG}\\"/" deploy/local/values-local.yaml
 
-          git add deploy/local/values-local.yaml
-          if git diff --cached --quiet; then
-            echo "No values change to commit."
-            exit 0
-          fi
+            git add deploy/local/values-local.yaml
+            if git diff --cached --quiet; then
+              echo "No values change to commit."
+              exit 0
+            fi
 
-          git commit -m "ci: update image tag ${IMAGE_TAG} [skip ci]"
-          git push origin "HEAD:${GIT_PUSH_BRANCH}"
-        '''
+            git commit -m "ci: update image tag ${IMAGE_TAG} [skip ci]"
+            git push origin "HEAD:${GIT_PUSH_BRANCH}"
+          '''
+        }
       }
     }
 

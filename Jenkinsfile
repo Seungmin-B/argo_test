@@ -60,7 +60,7 @@ pipeline {
 
             git commit -m "ci: update image tag ${IMAGE_TAG} [skip ci]"
             GIT_SSH_COMMAND="ssh -i ${SSH_KEY} -o StrictHostKeyChecking=yes" \
-              git push origin "HEAD:${GIT_PUSH_BRANCH}"
+              git push origin "HEAD:refs/heads/${GIT_PUSH_BRANCH}"
           '''
         }
       }

@@ -5,6 +5,9 @@ pipeline {
     REGISTRY = "${env.REGISTRY ?: 'registry.local:5000'}"
     IMAGE_NAME = "${env.IMAGE_NAME ?: 'hello-demo'}"
     IMAGE_TAG = "${env.IMAGE_TAG ?: env.BUILD_NUMBER}"
+    GIT_PUSH_BRANCH = "${env.GIT_PUSH_BRANCH ?: 'deploy'}"
+    GIT_USER_NAME = "${env.GIT_USER_NAME ?: 'jenkins'}"
+    GIT_USER_EMAIL = "${env.GIT_USER_EMAIL ?: 'jenkins@localhost'}"
   }
 
   stages {
@@ -32,6 +35,31 @@ pipeline {
       }
       steps {
         sh 'docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
+      }
+    }
+
+    stage('Update Values') {
+      when {
+        expression { return env.SKIP_PUSH != 'true' }
+      }
+      steps {
+        sh '''
+          set -eu
+
+          git config user.name "${GIT_USER_NAME}"
+          git config user.email "${GIT_USER_EMAIL}"
+
+          sed -i "s/^  tag: .*/  tag: \\"${IMAGE_TAG}\\"/" deploy/local/values-local.yaml
+
+          git add deploy/local/values-local.yaml
+          if git diff --cached --quiet; then
+            echo "No values change to commit."
+            exit 0
+          fi
+
+          git commit -m "ci: update image tag ${IMAGE_TAG} [skip ci]"
+          git push origin "HEAD:${GIT_PUSH_BRANCH}"
+        '''
       }
     }
 

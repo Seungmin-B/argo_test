@@ -27,11 +27,14 @@ Jenkins (파이프라인 잡):
 - Definition: "Pipeline script from SCM"
 - SCM: Git
 - Repo: `git@github.com:Seungmin-B/argo_test.git`
-- Branch: `*/main`
+- Branch: `*/dev`
 - Script Path: `Jenkinsfile`
 - 환경변수:
   - `REGISTRY=localhost:5001`
   - `IMAGE_NAME=hello-demo`
+  - `GIT_PUSH_BRANCH=deploy`
+  - `GIT_USER_NAME=jenkins`
+  - `GIT_USER_EMAIL=jenkins@localhost`
 
 ArgoCD:
 - 설치:
@@ -41,11 +44,12 @@ ArgoCD:
   - `kubectl apply -f deploy/argocd/app.yaml`
 
 전체 흐름:
-- `main` 브랜치에 `git push`
+- `dev` 브랜치에 `git push`
 - Jenkins 실행:
   - npm install/test
   - docker build/push -> `localhost:5001/hello-demo:<tag>`
-- ArgoCD가 repo 변경 감지 후 Helm 차트 동기화
+  - `deploy/local/values-local.yaml`의 tag를 업데이트하고 `deploy` 브랜치로 push
+- ArgoCD가 `deploy` 브랜치 변경 감지 후 Helm 차트 동기화
 - Kubernetes가 새 이미지를 가져와 Deployment 업데이트
 
 로컬 확인:
@@ -54,5 +58,6 @@ ArgoCD:
 - `curl http://localhost:8081/`
 
 메모:
+- Jenkins가 `deploy` 브랜치로 push할 수 있도록 GitHub Deploy Key에 write 권한이 필요하다.
 - `deploy/argocd/app.yaml`에는 로컬 레지스트리 이미지를 위해 `../local/values-local.yaml`이 포함되어 있다.
 - 8080 포트가 사용 중이면 8081 또는 다른 포트로 포워딩한다.

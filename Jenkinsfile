@@ -43,7 +43,7 @@ pipeline {
         expression { return env.SKIP_PUSH != 'true' }
       }
       steps {
-        sshagent(['github-ssh']) {
+        withCredentials([sshUserPrivateKey(credentialsId: 'github-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
           sh '''
             set -eu
 
@@ -59,7 +59,8 @@ pipeline {
             fi
 
             git commit -m "ci: update image tag ${IMAGE_TAG} [skip ci]"
-            git push origin "HEAD:${GIT_PUSH_BRANCH}"
+            GIT_SSH_COMMAND="ssh -i ${SSH_KEY} -o StrictHostKeyChecking=yes" \
+              git push origin "HEAD:${GIT_PUSH_BRANCH}"
           '''
         }
       }
